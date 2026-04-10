@@ -5,7 +5,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>G&R Bingo 😤</title>
-<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #1a1a2e;
@@ -23,7 +22,7 @@
 - { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body {
-font-family: ‘Nunito’, sans-serif;
+font-family: -apple-system, BlinkMacSystemFont, ‘Helvetica Neue’, Arial, sans-serif;
 background: var(–bg);
 color: var(–text);
 min-height: 100vh;
@@ -44,7 +43,7 @@ padding: 20px;
 }
 
 #login-screen h1 {
-font-family: ‘Permanent Marker’, cursive;
+font-family: Georgia, serif;
 font-size: 2.8rem;
 color: var(–gold);
 text-shadow: 3px 3px 0 #000;
@@ -63,7 +62,7 @@ max-width: 280px;
 padding: 18px;
 border: none;
 border-radius: 16px;
-font-family: ‘Permanent Marker’, cursive;
+font-family: Georgia, serif;
 font-size: 1.4rem;
 cursor: pointer;
 transition: transform 0.1s;
@@ -91,7 +90,7 @@ margin-bottom: 12px;
 }
 
 header h1 {
-font-family: ‘Permanent Marker’, cursive;
+font-family: Georgia, serif;
 font-size: 1.8rem;
 color: var(–gold);
 text-shadow: 2px 2px 0 #000;
@@ -159,7 +158,8 @@ display: none;
 .bingo-banner {
 display: none;
 text-align: center;
-font-family: ‘Permanent Marker’, cursive;
+font-family: Georgia, serif;
+font-weight: 900;
 font-size: 2.5rem;
 color: var(–gold);
 text-shadow: 3px 3px 0 var(–gary);
@@ -211,7 +211,7 @@ overflow: hidden;
 background: var(–gold);
 color: #111;
 border-color: var(–gold);
-font-family: ‘Permanent Marker’, cursive;
+font-family: Georgia, serif;
 font-size: 0.6rem;
 cursor: default;
 }
@@ -244,19 +244,7 @@ border-color: #0fcc77 !important;
 animation: pulse 0.6s ease-in-out;
 }
 
-/* SCRATCH CARD OVERLAY */
-.cell.scratch {
-border-style: dashed;
-border-color: var(–gold);
-}
-
-.cell.scratch::before {
-content: ‘🎁’;
-position: absolute;
-top: 2px;
-left: 3px;
-font-size: 0.6rem;
-}
+/* SCRATCH CARD - hidden, no visual indicator */
 
 @keyframes pulse {
 0% { transform: scale(1); }
@@ -287,23 +275,37 @@ max-width: 320px;
 width: 100%;
 border: 2px solid var(–gold);
 animation: pop 0.3s ease-out;
+position: relative;
+overflow: hidden;
+}
+
+.modal-trophy {
+font-size: 3.5rem;
+margin-bottom: 8px;
+animation: bounce 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+from { transform: translateY(0); }
+to { transform: translateY(-8px); }
 }
 
 .modal h2 {
-font-family: ‘Permanent Marker’, cursive;
-font-size: 1.8rem;
+font-family: Georgia, serif;
+font-weight: 900;
+font-size: 1.4rem;
 color: var(–gold);
 margin-bottom: 12px;
 }
 
 .modal .reward-text {
-font-size: 1.1rem;
+font-size: 1.05rem;
 font-weight: 700;
 color: var(–text);
-line-height: 1.4;
+line-height: 1.5;
 margin-bottom: 20px;
 padding: 16px;
-background: rgba(255,255,255,0.05);
+background: rgba(255,255,255,0.07);
 border-radius: 12px;
 }
 
@@ -319,7 +321,25 @@ color: #111;
 border: none;
 border-radius: 10px;
 padding: 12px 28px;
-font-family: ‘Nunito’, sans-serif;
+font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+font-weight: 900;
+font-size: 1rem;
+cursor: pointer;
+}
+
+/* CONFETTI */
+.confetti-piece {
+position: absolute;
+width: 8px;
+height: 8px;
+border-radius: 2px;
+animation: confetti-fall 1.5s ease-in forwards;
+}
+
+@keyframes confetti-fall {
+0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+100% { transform: translateY(300px) rotate(720deg); opacity: 0; }
+}
 font-weight: 900;
 font-size: 1rem;
 cursor: pointer;
@@ -334,7 +354,7 @@ margin-top: 4px;
 }
 
 .btn-small {
-font-family: ‘Nunito’, sans-serif;
+font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 font-weight: 700;
 font-size: 0.8rem;
 padding: 8px 16px;
@@ -399,11 +419,12 @@ padding: 20px;
 <!-- SCRATCH MODAL -->
 
 <div class="modal-overlay" id="modal">
-  <div class="modal">
-    <h2>🎁 Prize!</h2>
+  <div class="modal" id="modal-inner">
+    <div class="modal-trophy">🏆</div>
+    <h2>🎉 You've Won a Prize! 🎉</h2>
     <div class="reward-text" id="modal-text"></div>
     <div class="already-claimed" id="modal-claimed"></div>
-    <button class="modal-close" onclick="closeModal()">Woo hoo! 🎉</button>
+    <button class="modal-close" onclick="closeModal()">Claim it! 🎊</button>
   </div>
 </div>
 
@@ -441,21 +462,20 @@ const ALL_COMPLAINTS = [
 ];
 
 // ── REWARDS (private — only shown when scratched) ────────────
-// 5 for Gary's card, 5 for Renée's card
 const REWARDS = {
   gary:  [
-    "Renée's choice — anything goes tonight 🔥",
-    "Breakfast in bed... and whatever follows 😏",
-    "Gary picks the fantasy — Renée makes it happen 💋",
-    "Slow evening, no phones, all attention on you two 🕯️",
-    "One free pass — Gary's wildcard request 🃏"
+    "You have won… a long slow pegging! 🍑",
+    "You have won… a blow job in the garden! 🌿",
+    "You have won… a session with the small pink one! 💗",
+    "You have won… a long penis massage! 💆",
+    "You have won… a hard shafting with the strap-on! 🎉"
   ],
   renee: [
-    "Gary's full attention — Renée's rules tonight 👑",
-    "Romantic bath together — Renée sets the scene 🛁",
-    "Renée picks the fantasy — Gary delivers 💋",
-    "Lazy morning, stay in bed as long as you like 😴",
-    "One free pass — Renée's wildcard request 🃏"
+    "You have won… a double oral sex session! 👅",
+    "You have won… DP! 🔥",
+    "You have won… anal completion! 🍒",
+    "You have won… a relaxing toys session! 🧸",
+    "You have won… sex in the swing! 🎠"
   ]
 };
 
@@ -652,6 +672,23 @@ function showModal(player, scratchIdx, alreadyClaimed) {
   document.getElementById('modal-text').textContent = reward;
   document.getElementById('modal-claimed').textContent = alreadyClaimed ? '(Already claimed — showing again 😉)' : '';
   document.getElementById('modal').classList.add('show');
+
+  // Confetti
+  if (!alreadyClaimed) {
+    const modal = document.getElementById('modal-inner');
+    const colours = ['#f5a623','#e94560','#a855f7','#0f9b58','#fff','#ff6b6b'];
+    for (let i = 0; i < 24; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.top = '-10px';
+      piece.style.background = colours[Math.floor(Math.random() * colours.length)];
+      piece.style.animationDelay = (Math.random() * 0.8) + 's';
+      piece.style.animationDuration = (1 + Math.random() * 0.8) + 's';
+      modal.appendChild(piece);
+      setTimeout(() => piece.remove(), 2500);
+    }
+  }
 }
 
 window.closeModal = function() {
